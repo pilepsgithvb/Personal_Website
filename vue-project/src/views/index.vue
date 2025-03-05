@@ -76,7 +76,7 @@
     <div class="carousel">
         <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
         <div class="carousel-images">
-            <img src="pic1.jpg" alt="Picture">
+          
             <img src="pic2.jpeg" alt="Bonding with friends">
             <img src="pic3.jpeg" alt="Bonding with friends2">
         </div>
