@@ -204,13 +204,14 @@ onMounted(() => {
 })
 </script>
 <style>
+/* Base styles */
 :root {
-  --primary-color: #2563eb;
-  --success-color: #22c55e;
-  --error-color: #ef4444;
-  --text-color: #1f2937;
-  --border-color: #e5e7eb;
-  --bg-color: #f9fafb;
+  --primary: #3B82F6;
+  --success: #10B981;
+  --error: #EF4444;
+  --text: #1F2937;
+  --border: #E5E7EB;
+  --background: #F9FAFB;
 }
 
 .comments-container {
@@ -219,18 +220,37 @@ onMounted(() => {
   padding: 0 1rem;
 }
 
+/* Error state */
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  background: #FEF2F2;
+  border-radius: 8px;
+  border: 1px solid #FECACA;
+  color: var(--error);
+}
+
+.error-container h2 {
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: var(--primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* Form styles */
 .comment-form {
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 3rem;
-}
-
-.comment-form h2 {
-  font-size: 1.5rem;
-  color: var(--text-color);
-  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
 .input-group {
@@ -240,41 +260,37 @@ onMounted(() => {
 label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--text-color);
+  color: var(--text);
   font-weight: 500;
 }
 
 input, textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.2s;
 }
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .submit-btn {
-  background: var(--primary-color);
+  background: var(--primary);
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.submit-btn:hover {
-  opacity: 0.9;
 }
 
 .submit-btn:disabled {
@@ -283,32 +299,15 @@ input:focus, textarea:focus {
 }
 
 .loading {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
+  border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-.status-message {
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.success {
-  background: rgba(34, 197, 94, 0.1);
-  color: var(--success-color);
-}
-
-.error {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--error-color);
-}
-
+/* Comments list */
 .comment-list {
   display: grid;
   gap: 1.5rem;
@@ -317,9 +316,9 @@ input:focus, textarea:focus {
 .comment-card {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border);
 }
 
 .comment-header {
@@ -332,14 +331,13 @@ input:focus, textarea:focus {
 .user-avatar {
   width: 40px;
   height: 40px;
-  background: var(--primary-color);
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  flex-shrink: 0;
 }
 
 .user-info {
@@ -347,26 +345,38 @@ input:focus, textarea:focus {
   flex-direction: column;
 }
 
-.comment-name {
-  font-weight: 600;
-  color: var(--text-color);
-}
-
 .comment-date {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #6B7280;
 }
 
-.comment-content {
-  color: var(--text-color);
-  line-height: 1.6;
-  white-space: pre-wrap;
+.no-comments {
+  text-align: center;
+  padding: 2rem;
+  color: #6B7280;
+}
+
+.status-message {
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.status-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.status-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
+/* Mobile styles */
 @media (max-width: 640px) {
   .comment-form {
     padding: 1.5rem;
