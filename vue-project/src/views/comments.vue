@@ -1,172 +1,206 @@
 <template>
   <div class="comments-container">
-    <div class="comment-form">
-      <h2>Leave a Comment</h2>
-      <form @submit.prevent="submitComment" id="commentForm">
-        <div class="input-group">
-          <label for="name">Name</label>
-          <input 
-            type="text" 
-            id="name" 
-            v-model="name" 
-            placeholder="Your name"
-            required
-          >
-        </div>
-        <div class="input-group">
-          <label for="comment">Comment</label>
-          <textarea 
-            id="comment" 
-            v-model="comment" 
-            placeholder="Share your thoughts..."
-            rows="4" 
-            required
-          ></textarea>
-        </div>
-        <button 
-          type="submit" 
-          class="submit-btn"
-          :disabled="submissionStatus === 'Submitting...'"
-        >
-          <span v-if="submissionStatus !== 'Submitting...'">Post Comment</span>
-          <span v-else class="loading">Posting...</span>
-        </button>
-        <div 
-          v-if="submissionStatus" 
-          class="status-message"
-          :class="{ 
-            'success': submissionStatus.includes('successfully'), 
-            'error': submissionStatus.includes('Error') 
-          }"
-        >
-          {{ submissionStatus }}
-        </div>
-      </form>
+    <!-- Error State -->
+    <div v-if="errorState" class="error-container">
+      <h2>⚠️ Something Went Wrong</h2>
+      <p>{{ initializationError }}</p>
+      <button @click="initializeApp" class="retry-btn">Retry</button>
     </div>
 
-    <div class="comment-list">
-      <div 
-        v-for="comment in comments" 
-        :key="comment.id" 
-        class="comment-card"
-      >
-        <div class="comment-header">
-          <div class="user-avatar">
-            {{ getInitials(comment.name) }}
+    <!-- Normal State -->
+    <template v-else>
+      <div class="comment-form">
+        <h2>Leave a Comment</h2>
+        <form @submit.prevent="submitComment">
+          <div class="input-group">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              v-model="name"
+              placeholder="Your name"
+              required
+              :disabled="loading"
+            >
           </div>
-          <div class="user-info">
-            <span class="comment-name">{{ comment.name }}</span>
-            <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+          <div class="input-group">
+            <label for="comment">Comment</label>
+            <textarea
+              id="comment"
+              v-model="comment"
+              placeholder="Share your thoughts..."
+              rows="4"
+              required
+              :disabled="loading"
+            ></textarea>
           </div>
-        </div>
-        <p class="comment-content">{{ comment.comment }}</p>
+          <button
+            type="submit"
+            class="submit-btn"
+            :disabled="loading"
+          >
+            <span v-if="!loading">Post Comment</span>
+            <span v-else class="loading"></span>
+          </button>
+          <div
+            v-if="submissionStatus"
+            class="status-message"
+            :class="statusClass"
+          >
+            {{ submissionStatus }}
+          </div>
+        </form>
       </div>
-    </div>
+
+      <div class="comment-list">
+        <div v-if="loadingComments" class="loading-comments">
+          Loading comments...
+        </div>
+        <template v-else>
+          <div
+            v-for="comment in comments"
+            :key="comment.id"
+            class="comment-card"
+          >
+            <div class="comment-header">
+              <div class="user-avatar">
+                {{ getInitials(comment.name) }}
+              </div>
+              <div class="user-info">
+                <span class="comment-name">{{ comment.name }}</span>
+                <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+              </div>
+            </div>
+            <p class="comment-content">{{ comment.comment }}</p>
+          </div>
+          <div v-if="comments.length === 0" class="no-comments">
+            No comments yet. Be the first to share your thoughts!
+          </div>
+        </template>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase
+// Configuration
 const supabase = createClient(
-  'YOUR_SUPABASE_URL',
-  'YOUR_SUPABASE_ANON_KEY'
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_KEY
 )
 
-// Reactive variables
+// Reactive state
 const name = ref('')
 const comment = ref('')
-const submissionStatus = ref(null)
 const comments = ref([])
+const loading = ref(false)
+const loadingComments = ref(true)
+const errorState = ref(false)
+const initializationError = ref('')
+const submissionStatus = ref('')
 
-// Format date display
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  })
-}
+// Computed properties
+const statusClass = computed(() => ({
+  success: submissionStatus.value?.includes('success'),
+  error: submissionStatus.value?.includes('Error')
+}))
 
-// Generate avatar initials
+// Helper functions
 const getInitials = (name) => {
   return name.split(' ')
+    .slice(0, 2)
     .map(part => part[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2)
 }
 
-// Submit comment
-const submitComment = async () => {
-  if (submissionStatus.value === 'Submitting...') return
-  
-  submissionStatus.value = "Submitting..."
-  
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// Core functionality
+const initializeApp = async () => {
   try {
-    const { data, error } = await supabase
+    errorState.value = false
+    loadingComments.value = true
+    
+    // Test connection
+    const { error: connError } = await supabase
       .from('comments')
-      .insert([
-        { 
-          name: name.value.trim(), 
-          comment: comment.value.trim() 
-        }
-      ])
-      .select()
+      .select('*')
+      .limit(1)
+      
+    if (connError) throw new Error('Database connection failed')
 
-    if (error) throw error
-
-    // Update comments list optimistically
-    comments.value = [data[0], ...comments.value]
-    
-    submissionStatus.value = "Comment submitted successfully!"
-    name.value = ''
-    comment.value = ''
-    
-  } catch (err) {
-    console.error("Submission Error:", err)
-    submissionStatus.value = `Error: ${err.message}`
-  }
-}
-
-// Fetch comments
-const getComments = async () => {
-  try {
+    // Load comments
     const { data, error } = await supabase
       .from('comments')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) throw error
-
     comments.value = data
-    console.log('Comments loaded:', data)
+    loadingComments.value = false
   } catch (err) {
-    console.error("Error fetching comments:", err)
-    submissionStatus.value = "Error loading comments."
+    handleError(err)
   }
 }
 
-// Test database connection
-const testConnection = async () => {
+const submitComment = async () => {
+  if (loading.value) return
+  
+  loading.value = true
+  submissionStatus.value = 'Submitting...'
+  
   try {
     const { data, error } = await supabase
       .from('comments')
-      .select('*')
-      .limit(1)
-    
-    console.log('Connection test:', { data, error })
+      .insert([{
+        name: name.value.trim(),
+        comment: comment.value.trim()
+      }])
+      .select()
+
+    if (error) throw error
+
+    comments.value = [data[0], ...comments.value]
+    name.value = ''
+    comment.value = ''
+    submissionStatus.value = 'Comment submitted successfully!'
   } catch (err) {
-    console.error('Connection test failed:', err)
+    submissionStatus.value = `Error: ${err.message}`
+    console.error('Submission error:', err)
+  } finally {
+    loading.value = false
   }
+}
+
+// Error handling
+const handleError = (err) => {
+  console.error('Application error:', err)
+  errorState.value = true
+  initializationError.value = err.message
+  loadingComments.value = false
+  loading.value = false
 }
 
 // Lifecycle hooks
 onMounted(() => {
-  getComments()
-  testConnection()
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_KEY) {
+    handleError(new Error('Missing Supabase configuration'))
+    return
+  }
+  
+  initializeApp()
 })
 </script>
 <style>

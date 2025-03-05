@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Index from '@/views/index.vue';
-import comment from '@/views/comments.vue'
+import comments from '@/views/comments.vue'
 
 const routes = [
     { path: '/', component: Index }, 
-    { path: '/comments', component: comment}
+    { path: '/comments', component: comments}
 ];
 
 const router = createRouter({
