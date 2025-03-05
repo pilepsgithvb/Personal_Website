@@ -65,11 +65,11 @@
       <h2>Picture Gallery</h2>
       <div class="carousel">
         <button class="prev" @click="moveSlide(-1)">&#10094;</button>
-        <div class="carousel-images">
+        <!---<div class="carousel-images">
           <img src="pic1.jpg" alt="Picture 1" :class="{ active: currentSlide === 0 }">
           <img src="pic2.jpg" alt="Bonding with friends" :class="{ active: currentSlide === 1 }">
           <img src="pic3.jpg" alt="Bonding with friends 2" :class="{ active: currentSlide === 2 }">
-        </div>
+        </div>--->
         <button class="next" @click="moveSlide(1)">&#10095;</button>
       </div>
     </div>
