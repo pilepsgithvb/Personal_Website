@@ -76,9 +76,9 @@
     <div class="carousel">
         <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
         <div class="carousel-images">
-            <img src="pictures/pic1.jpg" alt="Picture">
-            <img src="pictures/pic2.jpeg" alt="Bonding with friends">
-            <img src="pictures/pic3.jpeg" alt="Bonding with friends2">
+            <img src="pic1.jpg" alt="Picture">
+            <img src="pic2.jpeg" alt="Bonding with friends">
+            <img src="pic3.jpeg" alt="Bonding with friends2">
         </div>
         <button class="next" onclick="moveSlide(1)">&#10095;</button>
     </div>
@@ -117,7 +117,7 @@ function moveSlide(direction) {
 .body {
     font-family: Corbel, Arial, sans-serif;
     text-align: center;
-    background-image: url('../pictures/bgIMG.png');
+    background-image: url('bgIMG.png');
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
