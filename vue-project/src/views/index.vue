@@ -16,26 +16,70 @@
       <div class="tile" @click="showContent('links')" style="--top-color: #145da0;">Links to Socials</div>
     </div>
 
-    <div v-for="section in sections" :key="section.id" :id="section.id" class="content" v-show="activeSection === section.id">
-      <h2>{{ section.title }}</h2>
-      <p v-if="section.text">{{ section.text }}</p>
-      <ul v-if="section.list">
-        <li v-for="item in section.list" :key="item">{{ item }}</li>
+    <!-- Content Sections -->
+    <div v-show="activeSection === 'about'" class="content">
+      <h2>About Me</h2>
+      <p>Hello! My name is Philippe, an aspiring IT student passionate about technology.</p>
+    </div>
+
+    <div v-show="activeSection === 'education'" class="content">
+      <h2>Education and Achievements</h2>
+      <ul>
+        <li>With High Honors (Malate Catholic School, 2019-2020)</li>
+        <li>With Honors (Asia Pacific College, 2023-2024)</li>
       </ul>
-      <table v-if="section.table">
+    </div>
+
+    <div v-show="activeSection === 'course'" class="content">
+      <h2>Course</h2>
+      <p>Bachelor of Science in IT Specializing in Mobile and Internet Technology</p>
+    </div>
+
+    <div v-show="activeSection === 'experience'" class="content">
+      <h2>IT Experience</h2>
+      <table>
         <tr><th>Project</th><th>Position</th></tr>
-        <tr v-for="row in section.table" :key="row.project">
-          <td>{{ row.project }}</td>
-          <td>{{ row.position }}</td>
-        </tr>
+        <tr><td>Tutor Booking App</td><td>UI Designer</td></tr>
+        <tr><td>APC Dungeon</td><td>Head Animator</td></tr>
+        <tr><td>Rambook</td><td>Head Developer</td></tr>
       </table>
-      <div v-if="section.isGallery" class="carousel">
+    </div>
+
+    <div v-show="activeSection === 'hobbies'" class="content">
+      <h2>Hobbies and Interests</h2>
+      <ul>
+        <li>Basketball</li>
+        <li>Gaming</li>
+        <li>Music</li>
+        <li>Watching Movies</li>
+      </ul>
+    </div>
+
+    <div v-show="activeSection === 'goals'" class="content">
+      <h2>Goals in Life</h2>
+      <p>To be successful in life and give back to my family.</p>
+    </div>
+
+    <!-- Image Carousel -->
+    <div v-show="activeSection === 'gallery'" class="content">
+      <h2>Picture Gallery</h2>
+      <div class="carousel">
         <button class="prev" @click="moveSlide(-1)">&#10094;</button>
         <div class="carousel-images">
-          <img v-for="(img, index) in galleryImages" :key="index" :src="img.src" :alt="img.alt" :class="{ active: index === currentSlide }">
+          <img src="pic1.jpg" alt="Picture 1" :class="{ active: currentSlide === 0 }">
+          <img src="pic2.jpg" alt="Bonding with friends" :class="{ active: currentSlide === 1 }">
+          <img src="pic3.jpg" alt="Bonding with friends 2" :class="{ active: currentSlide === 2 }">
         </div>
         <button class="next" @click="moveSlide(1)">&#10095;</button>
       </div>
+    </div>
+
+    <div v-show="activeSection === 'links'" class="content">
+      <h2>Links to Socials</h2>
+      <ul>
+        <li><a href="https://github.com/pilepsgithvb">GitHub Account</a></li>
+        <li><a href="https://www.linkedin.com/in/philippe-gerong-67705a24a">LinkedIn Profile</a></li>
+      </ul>
     </div>
   </div>
 </template>
@@ -44,23 +88,8 @@
 export default {
   data() {
     return {
-      activeSection: null,
-      currentSlide: 0,
-      sections: [
-        { id: "about", title: "About Me", text: "Hello! My name is Philippe..." },
-        { id: "education", title: "Education and Achievements", list: ["With High Honors (Malate Catholic School, 2019-2020)", "With Honors (Asia Pacific College, 2023-2024)"] },
-        { id: "course", title: "Course", text: "Bachelor of Science in IT Specializing in Mobile and Internet Technology" },
-        { id: "experience", title: "IT Experience", table: [{ project: "Tutor Booking App", position: "UI Designer" }, { project: "APC Dungeon", position: "Head Animator" }, { project: "Rambook", position: "Head Developer" }] },
-        { id: "hobbies", title: "Hobbies and Interests", list: ["Basketball", "Gaming", "Music", "Watching Movies"] },
-        { id: "goals", title: "Goals in Life", text: "To be successful and give back to my family." },
-        { id: "gallery", title: "Picture Gallery", isGallery: true },
-        { id: "links", title: "Links to Socials", text: "Connect with me:", list: ["GitHub", "LinkedIn"] }
-      ],
-      galleryImages: [
-        { url: "pic1.jpg", alt: "Picture 1" },
-        { url: "pic2.jpg", alt: "Bonding with friends" },
-        { url: "pic3.jpg", alt: "Bonding with friends 2" }
-      ]
+      activeSection: null, // Track active section
+      currentSlide: 0 // Track active slide in the gallery
     };
   },
   methods: {
@@ -68,7 +97,7 @@ export default {
       this.activeSection = id;
     },
     moveSlide(direction) {
-      const totalSlides = this.galleryImages.length;
+      const totalSlides = 3; // Number of images
       this.currentSlide = (this.currentSlide + direction + totalSlides) % totalSlides;
     }
   }
@@ -81,6 +110,7 @@ export default {
   text-align: center;
   background-image: url('bgIMG.png');
   background-size: cover;
+  margin: 0;
 }
 
 .header {
@@ -135,6 +165,7 @@ export default {
   text-align: left;
 }
 
+/* Image Carousel Styles */
 .carousel {
   position: relative;
   width: 100%;
@@ -153,6 +184,11 @@ export default {
   max-width: 100%;
   height: 500px;
   object-fit: cover;
+  display: none; /* Hide all images initially */
+}
+
+.carousel-images img.active {
+  display: block; /* Only show the active image */
 }
 
 .carousel button {
