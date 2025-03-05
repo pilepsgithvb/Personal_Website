@@ -79,5 +79,6 @@ async function getComments() {
 
 onMounted(() => {
   getComments()
+})
 </script>
 <style></style>
