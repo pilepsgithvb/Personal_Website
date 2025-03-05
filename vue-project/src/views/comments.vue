@@ -33,11 +33,6 @@
       </div>
   </div>
 
-  <footer>
-      <div class="image-container">
-          <img src="../images/rm.gif">
-      </div>
-  </footer>
 </template>
 
 <script setup>
