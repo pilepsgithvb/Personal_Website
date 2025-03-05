@@ -1,86 +1,174 @@
 <template>
   <div class="comments-container">
-         <div class="comment-form">
-             <h2>Leave a Comment</h2>
-             <form @submit.prevent="submitComment" id="commentForm">
-                 <input type="text" id="name" v-model="name" placeholder="Your Name" required>
-                 <textarea id="comment" v-model="comment" placeholder="Your Comment" rows="4" required></textarea>
-                 <button type="submit" class="submit-btn">Submit Comment</button>
-                 <div v-if="submissionStatus" class="mt-2">
-                     {{ submissionStatus }}
-                 </div>
-             </form>
-         </div>
- 
-         <div class="comment-list" id="commentList">
-             <div v-for="comment in comments" :key="comment.id" class="comment">
-                 <div class="comment-header">
-                     <span class="comment-name">{{ comment.name }}</span>
-                     <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
-                 </div>
-                 <p>{{ comment.comment }}</p>
-             </div>
-         </div>
-     </div>
- </template>
- <script>
- import { ref, onMounted } from 'vue'
- import { supabase } from '../lib/supabaseClient'
- 
- const name = ref('')
- const comment = ref('')
- const submissionStatus = ref(null)
- const comments = ref([])
- 
- const tableName = 'comments'
- 
- function formatDate(dateString) {
-   return new Date(dateString).toLocaleDateString('en-US', {
-     month: 'long',
-     day: 'numeric',
-     year: 'numeric'
-   })
- }
- 
- async function submitComment() {
-   submissionStatus.value = "Submitting..."
-   try {
-     const { error } = await supabase
-       .from(tableName)
-       .insert([{ name: name.value, comment: comment.value }])
- 
-     if (error) throw error
- 
-     submissionStatus.value = "Comment submitted successfully!"
-     name.value = ''
-     comment.value = ''
-     await getComments()
-   } catch (err) {
-     console.error("Error submitting comment:", err)
-     submissionStatus.value = "Error submitting comment. Please try again."
-   }
- }
- 
- async function getComments() {
-   try {
-     const { data, error } = await supabase
-       .from('comments')
-       .select('*')
-       .order('created_at', { ascending: false })
- 
-     if (error) throw error
- 
-     comments.value = data
-   } catch (err) {
-     console.error("Error fetching comments:", err)
-     submissionStatus.value = "Error loading comments."
-   }
- }
- 
- onMounted(() => {
-   getComments()
- })
- </script>
+    <div class="comment-form">
+      <h2>Leave a Comment</h2>
+      <form @submit.prevent="submitComment" id="commentForm">
+        <div class="input-group">
+          <label for="name">Name</label>
+          <input 
+            type="text" 
+            id="name" 
+            v-model="name" 
+            placeholder="Your name"
+            required
+          >
+        </div>
+        <div class="input-group">
+          <label for="comment">Comment</label>
+          <textarea 
+            id="comment" 
+            v-model="comment" 
+            placeholder="Share your thoughts..."
+            rows="4" 
+            required
+          ></textarea>
+        </div>
+        <button 
+          type="submit" 
+          class="submit-btn"
+          :disabled="submissionStatus === 'Submitting...'"
+        >
+          <span v-if="submissionStatus !== 'Submitting...'">Post Comment</span>
+          <span v-else class="loading">Posting...</span>
+        </button>
+        <div 
+          v-if="submissionStatus" 
+          class="status-message"
+          :class="{ 
+            'success': submissionStatus.includes('successfully'), 
+            'error': submissionStatus.includes('Error') 
+          }"
+        >
+          {{ submissionStatus }}
+        </div>
+      </form>
+    </div>
+
+    <div class="comment-list">
+      <div 
+        v-for="comment in comments" 
+        :key="comment.id" 
+        class="comment-card"
+      >
+        <div class="comment-header">
+          <div class="user-avatar">
+            {{ getInitials(comment.name) }}
+          </div>
+          <div class="user-info">
+            <span class="comment-name">{{ comment.name }}</span>
+            <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+          </div>
+        </div>
+        <p class="comment-content">{{ comment.comment }}</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase
+const supabase = createClient(
+  'YOUR_SUPABASE_URL',
+  'YOUR_SUPABASE_ANON_KEY'
+)
+
+// Reactive variables
+const name = ref('')
+const comment = ref('')
+const submissionStatus = ref(null)
+const comments = ref([])
+
+// Format date display
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+// Generate avatar initials
+const getInitials = (name) => {
+  return name.split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+// Submit comment
+const submitComment = async () => {
+  if (submissionStatus.value === 'Submitting...') return
+  
+  submissionStatus.value = "Submitting..."
+  
+  try {
+    const { data, error } = await supabase
+      .from('comments')
+      .insert([
+        { 
+          name: name.value.trim(), 
+          comment: comment.value.trim() 
+        }
+      ])
+      .select()
+
+    if (error) throw error
+
+    // Update comments list optimistically
+    comments.value = [data[0], ...comments.value]
+    
+    submissionStatus.value = "Comment submitted successfully!"
+    name.value = ''
+    comment.value = ''
+    
+  } catch (err) {
+    console.error("Submission Error:", err)
+    submissionStatus.value = `Error: ${err.message}`
+  }
+}
+
+// Fetch comments
+const getComments = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    comments.value = data
+    console.log('Comments loaded:', data)
+  } catch (err) {
+    console.error("Error fetching comments:", err)
+    submissionStatus.value = "Error loading comments."
+  }
+}
+
+// Test database connection
+const testConnection = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .limit(1)
+    
+    console.log('Connection test:', { data, error })
+  } catch (err) {
+    console.error('Connection test failed:', err)
+  }
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  getComments()
+  testConnection()
+})
+</script>
 <style>
 :root {
   --primary-color: #2563eb;
