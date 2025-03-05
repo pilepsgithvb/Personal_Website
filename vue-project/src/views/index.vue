@@ -8,7 +8,7 @@
     </div>
 
     <div class="header">PHILIPPE'S PERSONAL WEBSITE</div>
-
+    <div class="header"><RouterLink to="/comments">What do you think about my website?</RouterLink></div>
     <div class="container">
       <div class="tile" @click="showContent('hobbies')" style="--top-color: #e90d0d;">Hobbies and Interests</div>
       <div class="tile" @click="showContent('goals')" style="--top-color: #f2f212;">Goals in Life</div>
