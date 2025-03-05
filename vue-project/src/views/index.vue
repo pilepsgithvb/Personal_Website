@@ -57,9 +57,9 @@ export default {
         { id: "links", title: "Links to Socials", text: "Connect with me:", list: ["GitHub", "LinkedIn"] }
       ],
       galleryImages: [
-        { src: "/pic1.jpg", alt: "Picture 1" },
-        { src: "/pic2.jpg", alt: "Bonding with friends" },
-        { src: "/pic3.jpg", alt: "Bonding with friends 2" }
+        { url: "pic1.jpg", alt: "Picture 1" },
+        { url: "pic2.jpg", alt: "Bonding with friends" },
+        { url: "pic3.jpg", alt: "Bonding with friends 2" }
       ]
     };
   },
