@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Index from '@/views/index.vue';
-import comment from '@/views/comment.vue'
+import comment from '@/views/comments.vue'
 
 const routes = [
     { path: '/', component: Index }, 
