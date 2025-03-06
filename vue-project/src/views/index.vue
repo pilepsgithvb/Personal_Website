@@ -8,8 +8,11 @@
     </div>
 
     <div class="header">PHILIPPE'S PERSONAL WEBSITE</div>
-    <div class="header"><RouterLink to="/comments">What do you think about my website?</RouterLink></div>
-    <div class="container">
+    <div class="header">
+  <RouterLink to="/comments" style="color: white; text-decoration: none;">
+    Add Comments About my website?
+  </RouterLink>
+</div>    <div class="container">
       <div class="tile" @click="showContent('hobbies')" style="--top-color: #e90d0d;">Hobbies and Interests</div>
       <div class="tile" @click="showContent('goals')" style="--top-color: #f2f212;">Goals in Life</div>
       <div class="tile" @click="showContent('gallery')" style="--top-color: #089c08;">Picture Gallery</div>
@@ -61,18 +64,77 @@
     </div>
 
     <!-- Image Carousel -->
-    <div v-show="activeSection === 'gallery'" class="content">
-      <h2>Picture Gallery</h2>
-      <div class="carousel">
-        <button class="prev" @click="moveSlide(-1)">&#10094;</button>
-        <!---<div class="carousel-images">
-          <img src="pic1.jpg" alt="Picture 1" :class="{ active: currentSlide === 0 }">
-          <img src="pic2.jpg" alt="Bonding with friends" :class="{ active: currentSlide === 1 }">
-          <img src="pic3.jpg" alt="Bonding with friends 2" :class="{ active: currentSlide === 2 }">
-        </div>--->
-        <button class="next" @click="moveSlide(1)">&#10095;</button>
-      </div>
+<div v-show="activeSection === 'gallery'" class="content">
+  <h2>Picture Gallery</h2>
+  <div class="carousel">
+    <button class="prev" @click="moveSlide(-1)">&#10094;</button>
+    
+    <div class="carousel-images">
+      <img v-for="(image, index) in images" 
+           :key="index" 
+           :src="image" 
+           :alt="'Picture ' + (index + 1)"
+           :class="{ active: currentSlide === index }">
     </div>
+    
+    <button class="next" @click="moveSlide(1)">&#10095;</button>
+  </div>
+</div>
+
+<script setup>
+import { ref } from 'vue';
+
+const images = ref(["pic1.jpg", "pic2.jpg", "pic3.jpg"]);
+const currentSlide = ref(0);
+
+const moveSlide = (direction) => {
+  currentSlide.value = (currentSlide.value + direction + images.value.length) % images.value.length;
+};
+</script>
+
+<style>
+/* Styling for Carousel */
+.carousel {
+  position: relative;
+  width: 80%;
+  max-width: 600px;
+  margin: auto;
+  overflow: hidden;
+  text-align: center;
+}
+
+.carousel-images {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-images img {
+  display: none;
+  max-width: 100%;
+  height: auto;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-images img.active {
+  display: block;
+}
+
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+</style>
 
     <div v-show="activeSection === 'links'" class="content">
       <h2>Links to Socials</h2>
@@ -109,29 +171,56 @@ export default {
   font-family: Corbel, Arial, sans-serif;
   text-align: center;
   background-image: url('bgIMG.png');
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
   background-size: cover;
+  min-height: 100vh;
   margin: 0;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-image: url('bgIMG.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+
 .header {
+  font-family: 'Copperplate Gothic Bold', sans-serif;
   background-color: #c70000;
   color: white;
+  outline: 5px solid #c70000;
   padding: 30px;
   font-size: 50px;
   border: 5px solid white;
-  margin: 20px auto;
-  display: inline-block;
+  margin: 20px auto; /* Centers the header */
+  display: flex;
+  justify-content: center; /* Centers text horizontally */
+  align-items: center; /* Centers text vertically */
+  text-align: center;
+  width: 80%; /* Adjust width to fit nicely */
+  max-width: 800px; /* Prevents it from being too wide */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
+
 
 .container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  justify-content: center;
   gap: 20px;
   max-width: 900px;
   margin: 20px auto;
 }
 
 .tile {
+  position: relative; /* Ensure the top color bar is aligned to the tile */
   width: 250px;
   height: 150px;
   background-color: #e0e0e0;
@@ -143,72 +232,32 @@ export default {
   align-items: center;
   font-size: 22px;
   font-weight: bold;
+  border-radius: 10px; /* Added rounded corners */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
 }
 
 .tile::before {
   content: '';
   position: absolute;
   top: 0;
+  left: 0; /* Ensure alignment */
   width: 100%;
-  height: 20px;
+  height: 35px;
   background-color: var(--top-color);
   border-bottom: 2px solid black;
+  border-top-left-radius: 10px; 
+  border-top-right-radius: 10px;
 }
+
 
 .content {
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
   border: 2px solid #ccc;
-  border-radius: 10px;
+  border-radius: 10px; /* Added rounded corners */
   background-color: #f9f9f9;
   text-align: left;
-}
-
-/* Image Carousel Styles */
-.carousel {
-  position: relative;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  overflow: hidden;
-}
-
-.carousel-images {
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-}
-
-.carousel-images img {
-  width: 100%;
-  max-width: 100%;
-  height: 500px;
-  object-fit: cover;
-  display: none; /* Hide all images initially */
-}
-
-.carousel-images img.active {
-  display: block; /* Only show the active image */
-}
-
-.carousel button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  font-size: 18px;
-  z-index: 1;
-}
-
-.carousel .prev {
-  left: 10px;
-}
-
-.carousel .next {
-  right: 10px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); /* Added shadow */
 }
 </style>
